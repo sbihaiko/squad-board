@@ -1,0 +1,97 @@
+{
+  "board": {
+    "title": "Squad Board",
+    "description": "The monotone board: seven columns for the issue, two terminals, the other entities beside the axis."
+  },
+  "fieldNames": {
+    "statuses": "Status",
+    "kinds": "Kind",
+    "freeze": "Freeze",
+    "outcomes": "Outcome"
+  },
+  "rules": [
+    "A card's column is the furthest its work reached, and it never moves back. What holds a card now is a marker, never a move.",
+    "Done means merged into main. A card is never Closed over an open pull request, and never Closed on a run's local landed work.",
+    "A freeze is not a state. A frozen card keeps its column.",
+    "The columns are a view over kind and status, not a second axis."
+  ],
+  "statuses": [
+    {
+      "name": "Backlog",
+      "color": "GRAY",
+      "fact": "Open, not in the schedule: no startable label, no live run, no freeze",
+      "actor": "Nobody",
+      "terminal": false
+    },
+    {
+      "name": "Todo",
+      "color": "BLUE",
+      "fact": "Startable: no blocker, no live run",
+      "actor": "An agent",
+      "terminal": false
+    },
+    {
+      "name": "Doing",
+      "color": "YELLOW",
+      "fact": "A live run holds it",
+      "actor": "The run",
+      "terminal": false
+    },
+    {
+      "name": "Code Complete",
+      "color": "ORANGE",
+      "fact": "Finished and a pull request names the issue; not mergeable yet",
+      "actor": "An agent",
+      "terminal": false
+    },
+    {
+      "name": "Merging",
+      "color": "PURPLE",
+      "fact": "The pull request is green, mergeable and unheld",
+      "actor": "The merger",
+      "terminal": false
+    },
+    {
+      "name": "Testing",
+      "color": "PINK",
+      "fact": "The merge landed and the end-to-end pass runs on the merge commit",
+      "actor": "The pass",
+      "terminal": false
+    },
+    {
+      "name": "Closed",
+      "color": "GREEN",
+      "fact": "Merged into main and the issue closed",
+      "actor": "Nobody",
+      "terminal": true
+    },
+    {
+      "name": "Abandoned",
+      "color": "RED",
+      "fact": "Not delivered, by decision: wontfix, superseded, or needs-info expired",
+      "actor": "Nobody",
+      "terminal": true
+    }
+  ],
+  "kinds": [
+    { "name": "Bug", "color": "RED", "fact": "A defect" },
+    { "name": "Task", "color": "BLUE", "fact": "Work with a stated outcome" },
+    { "name": "Spec", "color": "PURPLE", "fact": "An issue carrying the spec label" },
+    { "name": "TestCase", "color": "YELLOW", "fact": "A test pass with a result" },
+    { "name": "PR", "color": "GREEN", "fact": "A pull request, normalized for viewing" }
+  ],
+  "freeze": [
+    { "name": "Owner", "color": "ORANGE", "fact": "frozen:owner - the owner is the next actor" },
+    { "name": "Dependency", "color": "GRAY", "fact": "frozen:dependency - another item gates this one" }
+  ],
+  "outcomes": [
+    { "name": "Merged", "color": "GREEN", "fact": "In main" },
+    { "name": "Abandoned", "color": "GRAY", "fact": "Given up by decision" },
+    { "name": "Failed", "color": "RED", "fact": "Ended without a delivery" },
+    { "name": "Reverted", "color": "ORANGE", "fact": "Delivered, then taken back" }
+  ],
+  "views": [
+    { "name": "All items", "layout": "TABLE_LAYOUT" },
+    { "name": "Board", "layout": "BOARD_LAYOUT", "groupBy": "Status" }
+  ]
+}
