@@ -11,3 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: bash ./test-apply.sh
+      - run: python3 ./render-readme.py --check
+      - run: bash ./test-readme.sh
+      - run: bash ./test-publish.sh
