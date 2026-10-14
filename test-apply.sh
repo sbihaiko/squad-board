@@ -167,7 +167,9 @@ test -f "$source_root/.github/workflows/ci.yml"
 grep -F 'bash ./test-apply.sh' "$source_root/.github/workflows/ci.yml"
 
 for forbidden in "$(git -C "$source_root" config --get remote.origin.url | cut -d/ -f4)" "$(basename "$(git -C "$source_root" config --get remote.origin.url)" .git)" "$(git -C "$source_root" config --get user.name)"; do
-  if git -C "$source_root" grep -n -F "$forbidden" -- . ':!test-apply.sh'; then
+  [ -n "$forbidden" ] || continue   # an unset value (no user.name on a CI runner) would match every line
+  # LICENSE names its copyright holder by design; the check guards the definition and its tooling.
+  if git -C "$source_root" grep -n -F "$forbidden" -- . ':!test-apply.sh' ':!LICENSE'; then
     printf '%s\n' 'repository or person text found' >&2
     exit 1
   fi
