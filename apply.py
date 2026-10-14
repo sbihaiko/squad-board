@@ -55,7 +55,7 @@ query($id: ID!) {
         nodes {
           __typename
           ... on ProjectV2Field { id name }
-          ... on ProjectV2SingleSelectField { id name options { id name } }
+          ... on ProjectV2SingleSelectField { id name options { id name color description } }
           ... on ProjectV2IterationField { id name }
         }
       }
@@ -99,23 +99,28 @@ def carried(field_name, owner, number):
     return counts
 
 
-def set_field(project_id, field, entries, owner, number, force, dry):
+def set_field(project_id, field, entries, owner, number, forced, dry):
     wanted = {e["name"] for e in entries}
     dropped = [o["name"] for o in field.get("options", []) if o["name"] not in wanted]
     if dropped:
         counts = carried(field["name"], owner, number)
-        if counts is None and not force:
+        unforced = [name for name in dropped if name not in forced]
+        if counts is None and unforced:
             sys.exit(
-                "%s: cannot read the item list to check the dropped option(s) %s; pass --force to drop them"
-                % (field["name"], ", ".join(dropped))
+                "%s: cannot read the item list to check the dropped option(s) %s; pass --force NAME to drop them"
+                % (field["name"], ", ".join(unforced))
             )
-        held = {name: counts.get(name, 0) for name in dropped} if counts else {}
-        if counts and any(held.values()) and not force:
+        held = {name: counts.get(name, 0) for name in unforced} if counts else {}
+        if counts and any(held.values()):
             sys.exit(
-                "%s: %s still carry a card; move those cards first, or pass --force"
+                "%s: %s still carry a card; move those cards first, or pass --force NAME"
                 % (field["name"], ", ".join("%s (%d)" % (n, c) for n, c in held.items() if c))
             )
     print("  %s: %d option(s)%s" % (field["name"], len(entries), " [dry-run]" if dry else ""))
+    desired = options_of(entries, field.get("options", []))
+    current = field.get("options", [])
+    if current == desired:
+        return
     if dry:
         return
     graphql(
@@ -159,7 +164,7 @@ def main():
     parser.add_argument("--title", default=DEF["board"]["title"])
     parser.add_argument("--project", type=int, help="an existing project number to update")
     parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--force", action="store_true", help="drop a status option that cards still carry")
+    parser.add_argument("--force", action="append", default=[], metavar="NAME", help="drop one named option that cards still carry")
     args = parser.parse_args()
 
     if args.project:
@@ -185,8 +190,12 @@ def main():
             make_field(project["id"], field_name, entries, args.dry_run)
 
     print("  description and readme")
-    if not args.dry_run:
-        readme = (HERE / "project-readme.md")
+    readme = (HERE / "project-readme.md")
+    if not args.dry_run and (
+        not args.project
+        or found.get("shortDescription") != DEF["board"]["description"]
+        or found.get("readme") != readme.read_text()
+    ):
         gh(
             [
                 "project", "edit", str(project["number"]), "--owner", args.owner,

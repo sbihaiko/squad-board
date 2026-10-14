@@ -1,4 +1,4 @@
-# squad-board
+# Board definition
 
 One GitHub Project definition for a repository worked by agents, applied by one command.
 
@@ -6,7 +6,6 @@ A card's column is **the furthest its work reached, and it never moves back**. W
 now is a marker, never a move. So a block, a revert or a red check is signalled beside the column
 and the flow of the columns stays drawable.
 
-Built for [`agent-squad`](https://github.com/sbihaiko/agent-squad), a Claude Agent SDK pipeline.
 The definition stands alone: it needs `gh` and nothing else.
 
 ## The columns
@@ -65,7 +64,7 @@ The run is idempotent: a second run changes nothing, and the option ids stay the
 loses its value.
 
 A status option that would be dropped while cards still carry it is **refused**, naming the counts.
-Pass `--force` only after the cards have moved. This is what keeps a vocabulary change from
+Pass `--force <option-name>` only after the cards have moved. This is what keeps a vocabulary change from
 silently emptying a column.
 
 ## The fields
